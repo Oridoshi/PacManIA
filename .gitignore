@@ -4,41 +4,8 @@ DerivedDataCache/
 Intermediate/
 Saved/
 
-# Visual Studio files
-.vs/
-*.sln
-*.suo
-*.user
-*.userprefs
-*.cache
-.vsconfig
-
 # IDE-specific files
 .idea/
 .vscode/
-
-# MacOS files
-.DS_Store
-
-# Windows thumbnail cache
-Thumbs.db
-
-# Compiled source files
-*.o
-*.obj
-*.pdb
-*.dll
-*.exe
-
-# Temporary files
-*.tmp
-*.log
-
-# Unreal Engine specific
-*.apk
-*.aab
-*.xcodeproj
-*.xcworkspace
-*.xcuserdatad/
-*.pbxuser
-*.xcuserdata/
+.vs/
+.vsconfig
