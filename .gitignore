@@ -1,7 +1,44 @@
-Binaries
-Build
-DerivedDataCache
-Intermediate
-Saved
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio files
+.vs/
+*.sln
+*.suo
+*.user
+*.userprefs
+*.cache
 .vsconfig
-.idea
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# MacOS files
+.DS_Store
+
+# Windows thumbnail cache
+Thumbs.db
+
+# Compiled source files
+*.o
+*.obj
+*.pdb
+*.dll
+*.exe
+
+# Temporary files
+*.tmp
+*.log
+
+# Unreal Engine specific
+*.apk
+*.aab
+*.xcodeproj
+*.xcworkspace
+*.xcuserdatad/
+*.pbxuser
+*.xcuserdata/
