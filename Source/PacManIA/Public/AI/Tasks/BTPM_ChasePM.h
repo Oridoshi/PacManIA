@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AI/APM_Ghost.h"
 #include "BehaviorTree/BTTaskNode.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "BTPM_ChasePM.generated.h"
 
 
@@ -21,7 +22,9 @@ public:
 
 	// Override de la fonction ExecuteTask
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-	
+	void MoveTowardsPacMan(AAIController* AIController, AActor* PacMan);
+	void OnMovementComplete(FAIRequestID RequestID, const FPathFollowingResult& Result);
+
 	AActor* GetPacMan() const;
 	AAPM_Ghost* GetGhostByColor(FString GhostColor) const;
 	bool IsWithinChaseDistance(AAPM_Ghost* Ghost, AActor* PacMan) const;

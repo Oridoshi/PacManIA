@@ -38,8 +38,8 @@ EBTNodeResult::Type UBTPM_ChasePM::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	AActor* PacMan = GetPacMan();
 	if (PacMan && IsWithinChaseDistance(Ghost, PacMan))
 	{
-		AIController->MoveToActor(PacMan);
-		return EBTNodeResult::Succeeded;
+		MoveTowardsPacMan(AIController, PacMan);
+		return EBTNodeResult::InProgress;
 	}
 	
 	FString GhostColor = Ghost->Color;
@@ -189,5 +189,31 @@ AActor* UBTPM_ChasePM::GetPacMan() const
 
 	return  FoundPacMan[0];
 }
+
+
+// Movement towards Pac-Man
+void UBTPM_ChasePM::MoveTowardsPacMan(AAIController* AIController, AActor* PacMan)
+{
+	if (!AIController || !PacMan)
+	{
+		return;
+	}
+
+	const float AcceptanceRadius = 30.0f; // Adjust this value if needed
+	
+	AIController->MoveToActor(PacMan, AcceptanceRadius, true, true, false, 0, true);
+	AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &UBTPM_ChasePM::OnMovementComplete);
+}
+
+// Callback for when the ghost finishes its movement
+void UBTPM_ChasePM::OnMovementComplete(FAIRequestID RequestID, const FPathFollowingResult& Result)
+{
+	// Check if the movement was successfully completed
+	if (Result.Code == EPathFollowingResult::Success)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cacth"));
+	}
+}
+
 
 
