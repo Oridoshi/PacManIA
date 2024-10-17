@@ -43,7 +43,7 @@ EBTNodeResult::Type UBTPM_ChasePM::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	{
 		MoveTo(AIController, PacMan->GetActorLocation());
 		//MoveTowardsPacMan(AIController, PacMan);
-		return EBTNodeResult::InProgress;
+		return EBTNodeResult::Succeeded;
 	}
 	
 	FString GhostColor = Ghost->Color;
