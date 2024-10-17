@@ -8,6 +8,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Navigation/NavLinkProxy.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Player/APM_PacMan.h"
 
@@ -25,12 +26,14 @@ EBTNodeResult::Type UBTPM_ChasePM::ExecuteTask(UBehaviorTreeComponent& OwnerComp
     
 	if (!ControlledPawn)
 	{
+		UE_LOG(LogTemp, Error, TEXT("ChasePM::ExecuteTask - No Pawn"));
 		return EBTNodeResult::Failed;
 	}
 	
 	AAPM_Ghost* Ghost = Cast<AAPM_Ghost>(ControlledPawn);
 	if (!Ghost)
 	{
+		UE_LOG(LogTemp, Error, TEXT("ChasePM::ExecuteTask - No Ghost"));
 		return EBTNodeResult::Failed;
 	}
 
@@ -38,7 +41,8 @@ EBTNodeResult::Type UBTPM_ChasePM::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	AActor* PacMan = GetPacMan();
 	if (PacMan && IsWithinChaseDistance(Ghost, PacMan))
 	{
-		MoveTowardsPacMan(AIController, PacMan);
+		MoveTo(AIController, PacMan->GetActorLocation());
+		//MoveTowardsPacMan(AIController, PacMan);
 		return EBTNodeResult::InProgress;
 	}
 	
@@ -60,6 +64,8 @@ EBTNodeResult::Type UBTPM_ChasePM::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		return EBTNodeResult::Succeeded;
 	}
 
+	UE_LOG(LogTemp, Error, TEXT("ChasePM::ExecuteTask - No Color : %s"), *Ghost->Color);
+	
 	return EBTNodeResult::Failed;
 }
 
@@ -76,7 +82,8 @@ bool UBTPM_ChasePM::RedGhostMovement(AAIController* AIController)
 	//movement
 	if (PacMan && AIController)
 	{
-		AIController->MoveToActor(PacMan);
+		MoveTo(AIController, PacMan->GetActorLocation());
+		//AIController->MoveToActor(PacMan);
 		return  true;
 	}
 	
@@ -98,12 +105,14 @@ bool UBTPM_ChasePM::OrangeGhostMovement(AAIController* AIController)
 
 			if (NavSys->GetRandomPointInNavigableRadius(AIController->GetPawn()->GetActorLocation(), SearchRadius, RandomLocation))
 			{
+				MoveTo(AIController, RandomLocation.Location);
 				// Déplace le fantôme vers une nouvelle destination aléatoire
-				AIController->MoveToLocation(RandomLocation.Location);
-				return true;
+				//AIController->MoveToLocation(RandomLocation.Location);
 			}
 		}
+		return true;
 	}
+	UE_LOG(LogTemp, Error, TEXT("ChasePM::OrangeGhostMovement"));
 	return false;
 }
 
@@ -118,8 +127,9 @@ bool UBTPM_ChasePM::BlueGhostMovement(AAIController* AIController)
 		FVector PacManForwardVector = PacMan->GetActorForwardVector();
 
 		FVector TargetLocation = PacManLocation + (PacManForwardVector * TrapDistance);
-		
-		AIController->MoveToLocation(TargetLocation);
+
+		MoveTo(AIController, TargetLocation);
+		//AIController->MoveToLocation(TargetLocation);
 		
 		return true;
 	}
@@ -144,7 +154,8 @@ bool UBTPM_ChasePM::YellowGhostMovement(AAIController* AIController)
 	
 	FVector TargetLocation = PacManLocation - (DirectionToRedGhost * TrapDistance);
 
-	AIController->MoveToLocation(TargetLocation);
+	MoveTo(AIController, TargetLocation);
+	//AIController->MoveToLocation(TargetLocation);
 
 	return true;
 }
@@ -214,6 +225,50 @@ void UBTPM_ChasePM::OnMovementComplete(FAIRequestID RequestID, const FPathFollow
 		UE_LOG(LogTemp, Warning, TEXT("Cacth"));
 	}
 }
+
+FVector UBTPM_ChasePM::ShouldUseTeleporter(FVector GhostLocation, FVector TargetLocation)
+{
+	float Distance = FVector::Dist(GhostLocation, TargetLocation);
+	TArray<AActor*> NavLinks;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANavLinkProxy::StaticClass(), NavLinks);
+
+	if(NavLinks.IsEmpty())
+	{
+		return TargetLocation;
+	}
+	
+	ANavLinkProxy* NavLink = Cast<ANavLinkProxy>(NavLinks[0]);
+	FVector Target = NavLink->PointLinks[0].Left;
+	FVector Exit = NavLink->PointLinks[0].Right;
+	if(FVector::Dist(GhostLocation, Target) > FVector::Dist(GhostLocation, Exit))
+	{
+		Target = NavLink->PointLinks[0].Right;
+		Exit = NavLink->PointLinks[0].Left;
+	}
+
+	float DistanceToTeleporter = FVector::Dist(GhostLocation, Target);
+	float DistanceFromExitToTarget = FVector::Dist(TargetLocation, Exit);
+
+	float DistanceWithTeleporter = DistanceToTeleporter + DistanceFromExitToTarget;
+
+
+	if(Distance < DistanceWithTeleporter)
+	{
+		return TargetLocation;
+	}
+
+	
+	return Target;
+}
+
+void UBTPM_ChasePM::MoveTo(AAIController* AIController, FVector TargetLocation)
+{
+	TargetLocation = ShouldUseTeleporter(AIController->GetPawn()->GetActorLocation(), TargetLocation);
+
+	AIController->MoveToLocation(TargetLocation);
+}
+
+
 
 
 

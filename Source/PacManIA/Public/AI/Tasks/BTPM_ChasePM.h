@@ -34,6 +34,9 @@ public:
 	bool BlueGhostMovement(AAIController* AIController);
 	bool YellowGhostMovement(AAIController* AIController);
 
+	FVector ShouldUseTeleporter(FVector GhostLocation, FVector PacManLocation);
+	void MoveTo(AAIController* AIController, FVector TargetLocation);
+
 	float TrapDistance = 300.0;
 	float ChaseDistance = 500.0;
 };
