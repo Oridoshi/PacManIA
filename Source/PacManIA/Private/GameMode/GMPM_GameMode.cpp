@@ -63,7 +63,7 @@ void AGMPM_GameMode::PacmanMort() const
 {
 	GameInstance->NbVieRestante--;
 	
-	if (GameInstance->NbVieRestante < 0)
+	if (GameInstance->NbVieRestante <= 0)
 	{
 		// Game Over
 		UE_LOG(LogTemp, Warning, TEXT("Game Over !"));
@@ -77,6 +77,8 @@ void AGMPM_GameMode::PacmanMort() const
 				GhostAIController->BlackboardComponent->SetValueAsBool("IsFleeing", false);
 				GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", false);
 			}
+
+			GameInstance->NbVieRestante = -1;
 
 			PacMan->Destroy();
 		}
@@ -113,7 +115,10 @@ void AGMPM_GameMode::VerifFinGame() const
 {
 	if (PacGums.Num() == 0)
 	{
-		GameInstance->NbVieRestante++;
+		if(GameInstance->NbVieRestante < 3)
+        {
+			GameInstance->NbVieRestante++;
+        }
 		UGameplayStatics::OpenLevel(this, FName(*LevelPacMan->GetName()), false);
 	}
 }
