@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "BTPM_Respawn.generated.h"
 
 /**
@@ -20,4 +21,9 @@ public:
 	// Override de la fonction ExecuteTask
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	
+	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
+
+private:
+	UBehaviorTreeComponent* MyOwnerComp;
+
 };

@@ -2,6 +2,7 @@
 
 
 #include "Object/APM_PacGum.h"
+#include "GameMode/GMPM_GameMode.h"
 
 #include "Components/BoxComponent.h"
 
@@ -23,6 +24,19 @@ AAPM_PacGum::AAPM_PacGum()
 void AAPM_PacGum::BeginPlay()
 {
 	Super::BeginPlay();
+
+	try
+	{
+		GameMode = Cast<AGMPM_GameMode>(GetWorld()->GetAuthGameMode());
+		
+	}
+	catch (_exception)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: GameMode is not valid"));
+		
+	}
+
+	GameMode->AddPacGum(this);
 	
 }
 

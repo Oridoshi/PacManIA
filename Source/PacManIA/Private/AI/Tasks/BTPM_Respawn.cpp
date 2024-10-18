@@ -4,8 +4,9 @@
 #include "AI/Tasks/BTPM_Respawn.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "AI/Navigation/NavigationTypes.h"
 #include "GameFramework/Actor.h"
-#include "NavigationSystem.h"
+#include "Navigation/PathFollowingComponent.h"
 
 UBTPM_Respawn::UBTPM_Respawn()
 {
@@ -20,12 +21,23 @@ EBTNodeResult::Type UBTPM_Respawn::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	{
 		return EBTNodeResult::Failed;
 	}
-
-	// Déplacer l'IA vers la position (0, 0, 0)
+	
 	FVector RespawnLocation = FVector(0.0f, -500.0f, 0.0f);
 	AIController->MoveToLocation(RespawnLocation);
 
-	return EBTNodeResult::Succeeded;
+	OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsFleeing", false);
+
+	
+	if (AIController->GetMoveStatus() == EPathFollowingStatus::Type::Idle)
+	{
+		//Une fois l'IA respawn, on la remet en vie
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsDead", false);
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsChasing", true);
+
+		return EBTNodeResult::Succeeded;
+	}
+
+	return EBTNodeResult::Failed;
 }
 
 

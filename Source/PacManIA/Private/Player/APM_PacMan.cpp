@@ -2,13 +2,15 @@
 
 
 #include "Player/APM_PacMan.h"
+#include "Object/APM_PacGum.h"
+#include "GameMode/GMPM_GameMode.h"
+#include "AI/APM_Ghost.h"
+#include "AI/APM_GhostAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
-#include "GameFramework/FloatingPawnMovement.h"
-#include "GameMode/GMPM_GameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "Object/APM_PacGum.h"
 
 
 // Sets default values
@@ -40,6 +42,8 @@ void AAPM_PacMan::BeginPlay()
 	try
 	{
 		GameMode = Cast<AGMPM_GameMode>(GetWorld()->GetAuthGameMode());
+
+		GameMode->PacMan = this;
 		
 	}
 	catch (_exception)
@@ -47,6 +51,8 @@ void AAPM_PacMan::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Error: GameMode is not valid"));
 		
 	}
+
+	StartLocation = GetActorLocation();
 	
 	if (AmbianceMusic)
 	{
@@ -159,7 +165,7 @@ void AAPM_PacMan::OnOverlap(AActor* MyActor, AActor* OtherActor)
 			}
 			
 			SuperPacMan();
-			GameMode->SuperPacGumMange();
+			GameMode->SuperPacGumMange(PacGum);
 		}
 		else
 		{
@@ -181,21 +187,32 @@ void AAPM_PacMan::OnOverlap(AActor* MyActor, AActor* OtherActor)
 				}
 			}
 			
-			GameMode->PacGumMange();
+			GameMode->PacGumMange(PacGum);
 		}
 
 		PacGum->Destroy();
 	}
-	else if(OtherActor->ActorHasTag("Fantome"))
+	else if(auto Ghost = Cast<AAPM_Ghost>(OtherActor))
 	{
-		if(IsSuperPacMan)
+		//Recupérer valeur de IsDead dans le Blackboard
+		
+		auto GhostAIController = Cast<AAPM_GhostAIController>(Cast<AAPM_Ghost>(Ghost)->GetController());
+		
+		if(GhostAIController && !GhostAIController->BlackboardComponent->GetValueAsBool("IsChasing"))
 		{
-			if(MangeFantomeSound)
-			{
-				UGameplayStatics::PlaySound2D(this, MangeFantomeSound);
-			}
 			
-			GameMode->FantomeMange();
+			if(!GhostAIController->BlackboardComponent->GetValueAsBool("IsDead"))
+			{
+				if(MangeFantomeSound)
+				{
+					UGameplayStatics::PlaySound2D(this, MangeFantomeSound);
+				}
+
+				//Mort Fantome
+				GhostAIController->BlackboardComponent->SetValueAsBool("IsDead", true);
+				
+				GameMode->FantomeMange();
+			}
 		}
 		else
 		{
@@ -204,31 +221,72 @@ void AAPM_PacMan::OnOverlap(AActor* MyActor, AActor* OtherActor)
 				UGameplayStatics::PlaySound2D(this, MortSound);
 			}
 			
-			//GameMode->PacManMort();
+			GameMode->PacmanMort();
 		}
 	}
 }
 
 void AAPM_PacMan::SuperPacMan()
 {
+	TArray<AActor*> Ghosts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAPM_Ghost::StaticClass(), Ghosts);
+	for(auto Ghost : Ghosts)
+	{
+		auto GhostAIController = Cast<AAPM_GhostAIController>(Cast<AAPM_Ghost>(Ghost)->GetController());
+		if(GhostAIController)
+		{
+			GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", false);
+			GhostAIController->BlackboardComponent->SetValueAsBool("IsFleeing", true);
+		}
+	}
+	
 	if(!IsSuperPacMan)
 	{
 		IsSuperPacMan = true;
 		Speed *= SpeedMultiplierSuperPacMan;
-		GetWorld()->GetTimerManager().SetTimer(SuperPacManTimerHandle, this, &AAPM_PacMan::SuperPacManEnd, 30.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(SuperPacManTimerHandle, this, &AAPM_PacMan::SuperPacManEnd, SuperPacManTime, false);
 	}
 	else
 	{
 		GetWorld()->GetTimerManager().ClearTimer(SuperPacManTimerHandle);
-		GetWorld()->GetTimerManager().SetTimer(SuperPacManTimerHandle, this, &AAPM_PacMan::SuperPacManEnd, 30.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(SuperPacManTimerHandle, this, &AAPM_PacMan::SuperPacManEnd, SuperPacManTime, false);
 	}
 }
 
 void AAPM_PacMan::SuperPacManEnd()
 {
+	
+	//Chasse Fantomes
+	TArray<AActor*> Ghosts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAPM_Ghost::StaticClass(), Ghosts);
+	for(auto Ghost : Ghosts)
+	{
+		auto GhostAIController = Cast<AAPM_GhostAIController>(Cast<AAPM_Ghost>(Ghost)->GetController());
+		if(GhostAIController)
+		{
+			if(!GhostAIController->BlackboardComponent->GetValueAsBool("IsDead"))
+			{
+				GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", true);
+				GhostAIController->BlackboardComponent->SetValueAsBool("IsFleeing", false);
+			}
+		}
+	}
+	
 	IsSuperPacMan = false;
 	Speed /= SpeedMultiplierSuperPacMan;
 	GetWorld()->GetTimerManager().ClearTimer(SuperPacManTimerHandle);
 	GameMode->ResetMultiplicateur();
 }
 
+void AAPM_PacMan::ResetLocation()
+{
+	SetActorLocation(StartLocation);
+
+	if(IsSuperPacMan)
+	{
+		IsSuperPacMan = false;
+		Speed /= SpeedMultiplierSuperPacMan;
+		GetWorld()->GetTimerManager().ClearTimer(SuperPacManTimerHandle);
+		GameMode->ResetMultiplicateur();
+	}
+}

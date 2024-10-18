@@ -6,6 +6,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "AI/APM_GhostAIController.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "GameMode/GMPM_GameMode.h"
 
 // Sets default values
 AAPM_Ghost::AAPM_Ghost()
@@ -37,6 +38,21 @@ void AAPM_Ghost::SetGhostSpeed(float NewSpeed)
 void AAPM_Ghost::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	StartLocation = GetActorLocation();
+
+	try
+	{
+		AGMPM_GameMode* GameMode = Cast<AGMPM_GameMode>(GetWorld()->GetAuthGameMode());
+
+		GameMode->AddFantome(this);
+		
+	}
+	catch (_exception)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error: GameMode is not valid"));
+		
+	}
 
 	//comme ça fonctionne pas on force comme des connards
 	if (!MovementComponent)
@@ -59,5 +75,10 @@ void AAPM_Ghost::Tick(float DeltaTime)
 void AAPM_Ghost::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AAPM_Ghost::ResetLocation()
+{
+	SetActorLocation(StartLocation);
 }
 

@@ -13,13 +13,14 @@ UCLASS()
 class PACMANIA_API AAPM_GhostAIController : public AAIController
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UBlackboardComponent* BlackboardComponent;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
-
-	UPROPERTY(VisibleAnywhere, Category = "AI")
-	class UBlackboardComponent* BlackboardComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UBehaviorTreeComponent* BehaviorTreeComponent;

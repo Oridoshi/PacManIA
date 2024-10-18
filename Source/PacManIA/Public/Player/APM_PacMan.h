@@ -40,7 +40,12 @@ public:
 	 */
 	UPROPERTY(EditAnywhere, Category="Mouvement", meta = (ClampMin = "1.0"))
 	float SpeedMultiplierSuperPacMan = 2;
-
+	
+	/**
+	 * Temps de super pac en seconde
+	 */
+	UPROPERTY(EditAnywhere, Category="Mouvement")
+	float SuperPacManTime = 10;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	USoundBase* MangePacGumSound1;
@@ -107,4 +112,16 @@ private:
 
 	UFUNCTION()
 	void HandleLoopingSound();
+
+private:
+	/**
+	 * Emplacement de départ
+	 */
+	UPROPERTY()
+	FVector StartLocation;
+
+public:
+	UFUNCTION()
+	void ResetLocation();
+	
 };

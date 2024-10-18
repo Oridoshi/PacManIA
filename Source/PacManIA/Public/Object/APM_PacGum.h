@@ -19,6 +19,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool IsSuperGum = false;
+
+	UPROPERTY()
+	class AGMPM_GameMode* GameMode;
 	
 	// Sets default values for this actor's properties
 	AAPM_PacGum();
