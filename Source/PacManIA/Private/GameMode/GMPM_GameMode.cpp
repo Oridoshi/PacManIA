@@ -99,6 +99,7 @@ void AGMPM_GameMode::PacmanMort() const
 					GhostAIController->BlackboardComponent->SetValueAsBool("IsDead"   , false);
 					GhostAIController->BlackboardComponent->SetValueAsBool("IsFleeing", false);
 					GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", false);
+					GhostAIController->StopMovement();
 					GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", true);
 				}
 			}
