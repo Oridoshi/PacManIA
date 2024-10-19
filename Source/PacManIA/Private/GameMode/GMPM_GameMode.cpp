@@ -96,7 +96,7 @@ void AGMPM_GameMode::PacmanMort() const
 				auto GhostAIController = Cast<AAPM_GhostAIController>(Cast<AAPM_Ghost>(Fantome)->GetController());
 				if (GhostAIController)
 				{
-					GhostAIController->BlackboardComponent->SetValueAsBool("IsDead", false);
+					GhostAIController->BlackboardComponent->SetValueAsBool("IsDead"   , false);
 					GhostAIController->BlackboardComponent->SetValueAsBool("IsFleeing", false);
 					GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", false);
 					GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", true);

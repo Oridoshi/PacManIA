@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "APM_GhostAIController.h"
 #include "GameFramework/Pawn.h"
 #include "APM_Ghost.generated.h"
 
@@ -11,11 +12,18 @@ class PACMANIA_API AAPM_Ghost : public APawn
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* BoxCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* StaticMesh;
+	UStaticMeshComponent* MeshChasing;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* MeshFleeing;
+    	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* MeshDead;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UFloatingPawnMovement* MovementComponent;
@@ -41,14 +49,17 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-    /**
-     * Emplacement de départ
-     */
-    UPROPERTY()
-    FVector StartLocation;
+	/**
+	 * Emplacement de départ
+	 */
+	UPROPERTY()
+	FVector StartLocation;
+
+	UPROPERTY()
+	AAPM_GhostAIController* AIController;
 
 public:
-    UFUNCTION()
-    void ResetLocation();
+	UFUNCTION()
+	void ResetLocation();
 
 };

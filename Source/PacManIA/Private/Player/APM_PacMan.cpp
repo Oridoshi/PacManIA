@@ -194,8 +194,6 @@ void AAPM_PacMan::OnOverlap(AActor* MyActor, AActor* OtherActor)
 	}
 	else if(auto Ghost = Cast<AAPM_Ghost>(OtherActor))
 	{
-		//Recupérer valeur de IsDead dans le Blackboard
-		
 		auto GhostAIController = Cast<AAPM_GhostAIController>(Cast<AAPM_Ghost>(Ghost)->GetController());
 		
 		if(GhostAIController && !GhostAIController->BlackboardComponent->GetValueAsBool("IsChasing"))
@@ -230,13 +228,16 @@ void AAPM_PacMan::SuperPacMan()
 {
 	TArray<AActor*> Ghosts;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAPM_Ghost::StaticClass(), Ghosts);
-	for(auto Ghost : Ghosts)
+	for(auto Actor : Ghosts)
 	{
-		auto GhostAIController = Cast<AAPM_GhostAIController>(Cast<AAPM_Ghost>(Ghost)->GetController());
-		if(GhostAIController)
+		if(auto Ghost = Cast<AAPM_Ghost>(Actor))
 		{
-			GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", false);
-			GhostAIController->BlackboardComponent->SetValueAsBool("IsFleeing", true);
+			auto GhostAIController = Cast<AAPM_GhostAIController>(Ghost->GetController());
+			if(GhostAIController && !GhostAIController->BlackboardComponent->GetValueAsBool("IsDead"))
+			{
+				GhostAIController->BlackboardComponent->SetValueAsBool("IsChasing", false);
+				GhostAIController->BlackboardComponent->SetValueAsBool("IsFleeing", true);
+			}
 		}
 	}
 	

@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "AI/APM_GhostAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameMode/GMPM_GameMode.h"
 
@@ -17,8 +18,14 @@ AAPM_Ghost::AAPM_Ghost()
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>("BoxCollision");
 	RootComponent = BoxCollision;
 
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
-	StaticMesh->SetupAttachment(BoxCollision);
+	MeshChasing = CreateDefaultSubobject<UStaticMeshComponent>("MeshChasing");
+	MeshChasing->SetupAttachment(BoxCollision);
+
+	MeshFleeing = CreateDefaultSubobject<UStaticMeshComponent>("MeshFleeing");
+	MeshFleeing->SetupAttachment(BoxCollision);
+
+	MeshDead = CreateDefaultSubobject<UStaticMeshComponent>("MeshDead");
+	MeshDead->SetupAttachment(BoxCollision);
 
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
 	MovementComponent->UpdatedComponent = BoxCollision;
@@ -40,6 +47,8 @@ void AAPM_Ghost::BeginPlay()
 	Super::BeginPlay();
 	
 	StartLocation = GetActorLocation();
+
+	AIController = Cast<AAPM_GhostAIController>(GetController());
 
 	try
 	{
@@ -69,6 +78,30 @@ void AAPM_Ghost::BeginPlay()
 void AAPM_Ghost::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if(AIController)
+	{
+		if(AIController->BlackboardComponent->GetValueAsBool("IsChasing"))
+		{
+			MeshDead->SetVisibility(false);
+			MeshFleeing->SetVisibility(false);
+			MeshChasing->SetVisibility(true);
+		}
+		else if(AIController->BlackboardComponent->GetValueAsBool("IsFleeing"))
+		{
+			MeshDead->SetVisibility(false);
+			MeshFleeing->SetVisibility(true);
+			MeshChasing->SetVisibility(false);
+		}
+		else if(AIController->BlackboardComponent->GetValueAsBool("IsDead"))
+		{
+			MeshDead->SetVisibility(true);
+			MeshFleeing->SetVisibility(false);
+			MeshChasing->SetVisibility(false);
+		}
+		
+		
+	}
 }
 
 // Called to bind functionality to input
