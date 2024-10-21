@@ -1,7 +1,11 @@
-Binaries
-Build
-DerivedDataCache
-Intermediate
-Saved
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# IDE-specific files
+.idea/
+.vscode/
+.vs/
 .vsconfig
-.idea
