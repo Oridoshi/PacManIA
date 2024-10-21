@@ -60,6 +60,9 @@ public:
 	USoundBase* MangeSuperPacGumSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* FinSuperPacGumSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	USoundBase* MangeFantomeSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")

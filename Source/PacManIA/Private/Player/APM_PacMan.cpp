@@ -256,6 +256,10 @@ void AAPM_PacMan::SuperPacMan()
 
 void AAPM_PacMan::SuperPacManEnd()
 {
+	if(FinSuperPacGumSound)
+	{
+		UGameplayStatics::PlaySound2D(this, FinSuperPacGumSound);
+	}
 	
 	//Chasse Fantomes
 	TArray<AActor*> Ghosts;
@@ -272,6 +276,7 @@ void AAPM_PacMan::SuperPacManEnd()
 			}
 		}
 	}
+
 	
 	IsSuperPacMan = false;
 	Speed /= SpeedMultiplierSuperPacMan;

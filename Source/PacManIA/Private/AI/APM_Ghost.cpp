@@ -71,7 +71,7 @@ void AAPM_Ghost::BeginPlay()
 	}
 
 	//Default Ghost Speed
-	SetGhostSpeed(600.0);
+	SetGhostSpeed(800.0);
 }
 
 // Called every frame
